@@ -1,0 +1,186 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Produto</title>
+    <link rel="stylesheet" href="css/style2.css" />
+    <link rel="stylesheet" href="css/style.css" />
+
+</head>
+
+<body>
+
+<div class="window">
+  <header class="toolbar toolbar-header">
+    <h1 class="title">Loja de Vendas</h1>
+     <!--Menu-->
+     <div class="toolbar-actions">
+    <div class="btn-group">
+      <button class="btn btn-default">
+         <span class="icon icon-home"></span>
+      </button>
+      <button class="btn btn-default">
+         <span class="icon icon-folder"></span>
+      </button>
+      <button class="btn btn-default active">
+         <span class="icon icon-cloud"></span>
+      </button>
+      <button class="btn btn-default">
+         <span class="icon icon-popup"></span>
+      </button>
+      <button class="btn btn-default">
+        <span class="icon icon-shuffle"></span>
+      </button>
+    </div>
+
+    <button class="btn btn-default">
+       <span class="icon icon-home icon-text">  </span>
+      Filters
+    </button>
+
+    <button class="btn btn-default btn-dropdown pull-right">
+       <span class="icon icon-megaphone"></span>
+    </button>
+  </div>
+    
+  </header>
+ 
+  <div class="window-content">
+      <div class="pane-group">
+        <div class="pane-sm sidebar">
+		  <p>lorem</p>
+		 </div>
+		<div class="pane">
+        
+         <!--Cadastro de Produtos-->
+           <button type="button" @click="createProduct()" class="btn btn-primary">Cadastro de Produto</button>
+            <a href="produto.html" class="btn btn-primary">Produto</a>
+            <a href="cadastro_cliente.html" class="btn btn-primary">Clientes</a>
+            
+        <table class="table table-striped">
+        	<thead>
+        		<tr>
+        			<th>Nome</th>
+        			<th>Quantidade</th>
+        			<th>Preço</th>
+        			<th>Código</th>
+        			<th>Tipo</th>
+        			<th>Venda</th>
+        		</tr>
+        	</thead>
+        	<!--Lista de clientes-->
+        	<tbody>
+        		<tr v-for="produto in produtos">
+        			<td>{{produto.nome}}</td>
+        			<td>{{produto.quantidade}}</td>
+        			<td>{{produto.preco}}</td>
+        			<td>{{produto.codigo}}</td>
+        			<td>{{produto.tipo}}</td>
+        			<td>{{produto.venda}}</td>
+        			<td> <button type="button" @click="editProduct(produto)" class="btn btn-primary">Editar</button></td>
+        		</tr>
+        	</tbody>
+          </table>
+         </div>
+     </div>
+   </div>
+   
+   <!--Rodape-->
+   <footer class="toolbar toolbar-footer">
+    <h4 class="title">Desenvolvido por Jadson Santos</h4>
+   </footer>
+	</div>
+       <div id="modal" v-if="openModal">
+      	 <div class=".wrap">
+      	 	 <!--Formulario de cadastro  -->
+			   <form id="cadastro-produto" action="" class="pane-body">
+				  <h3>Cadastro de Produtos</h3>
+				  <h3 v-if="mode=='edicao'">Editar Produto</h3>
+				   <div class="form-group">
+					   <input type="text" class="form-control" id="name" v-model="product.nome" placeholder="Nome">
+					 </div>
+					   <div class="form-group">
+						  <input type="text" class="form-control" id="quantidade" v-model="product.quantidade" placeholder="Quantidade">
+						</div>
+					   <div class="form-group">
+      	   	  	     <input type="text" class="form-control" id="preco" v-model="product.preco"
+      	   	  	     placeholder="Preço"></div>
+      	   	  	     <div class="form-group">
+      	   	  	     <input type="text" class="form-control" id="codigo" v-model="product.codigo"
+      	   	  	     placeholder="Código"></div>
+      	   	  	     <div class="form-group">
+      	   	  	     <input type="text" class="form-control" id="tipo" v-model="product.tipo"
+      	   	  	     placeholder="Tipo"></div>
+      	   	  	     <div class="form-group">
+      	   	  	     <input type="text" class="form-control" id="venda" v-model="product.venda"
+      	   	  	     placeholder="Venda"></div>
+      	   	  	     <button type="button"  class="btn btn-positive" @click="productStoreOrUpdate">Salvar</button>
+      	   	  	     <button type="button" class="btn btn-negative" @click="openModal=false">Fechar</button>
+		    </form>
+      	 </div>
+       </div>
+</body>
+   <script type="text/javascript">
+	   var read = require(('read-file-utf8')
+	   var loki = require('lokijs');
+	   var db = new loki('db.json')
+	   var data = read(__dirname+'/db.json');
+	   db.loadJSON(data);
+	   window.Vue = require('vue');
+	   var produtos = db.getColletion('produtos');
+	   console.log(db);
+	  // var produtos = db.addColletion('produtos');
+	   db.save();
+	   console.log(db);
+	   new Vue({
+		   el: 'body',
+		   data:{
+			   mode:'',
+			   openModal:false,
+			   produtos:[],
+			   product:{
+				   nome:'',
+        		   quantidade:0,
+        		   preco:'',
+        		   codigo:'',
+        		   tipo:'',
+        		   venda:'',
+			   }
+		   },
+		   ready: function(){
+	       this.produtos = produtos.data;
+	       //console.log(this.produtos);
+	   },
+		    methods:{
+		   editProduct: function(product){
+			   this.mode="edicao";
+			   this.openModal=true;
+			   this.product=product;
+		   },
+		   creatProduct:function(){
+			       this.mode="cadastro";
+			       this.openModal=true;
+			       this.product={
+				   nome:'',
+        		   quantidade:0,
+        		   preco:'',
+        		   codigo:'',
+        		   tipo:'',
+        		   venda:'',
+			   };
+		     },
+		     productStoreOrUpdate: function(){
+				 if(typeof this.product.$loki != 'undefined');{
+					 produtos.updade(this.product);
+				 }else{
+					 produtos.insert(this.product);
+				 }
+				 
+			     db.save();
+				 this.openModal=false;
+		    }
+	    }
+	   
+	 });
+  </script>
+</html>

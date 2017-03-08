@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Projeto Estagio</title>
+    <meta charset="utf-8" />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style2.css" />
+    <link rel="stylesheet" href="css/style.css" />
+
+    <!-- Electron Javascript -->
+    <script src="renderer.js" charset="utf-8"></script>
+	 
+  </head>
+
+  <body>
+ <div class="window">
+  <header class="toolbar toolbar-header">
+    <h1 class="title">Loja de Vendas</h1>
+     <!--Menu-->
+     <div class="toolbar-actions">
+    <div class="btn-group">
+      <button class="btn btn-default">
+         <span class="icon icon-home"></span>
+      </button>
+      <button class="btn btn-default">
+         <span class="icon icon-folder"></span>
+      </button>
+      <button class="btn btn-default active">
+         <span class="icon icon-cloud"></span>
+      </button>
+      <button class="btn btn-default">
+         <span class="icon icon-popup"></span>
+      </button>
+      <button class="btn btn-default">
+        <span class="icon icon-shuffle"></span>
+      </button>
+    </div>
+
+    <button class="btn btn-default">
+       <span class="icon icon-home icon-text">  </span>
+      Filters
+    </button>
+
+    <button class="btn btn-default btn-dropdown pull-right">
+       <span class="icon icon-megaphone"></span>
+    </button>
+  </div>
+    
+  </header>
+ 
+  <div class="window-content">
+      <div class="pane-group">
+        <div class="pane-sm sidebar">
+		  <nav class="nav-group">
+  <h5 class="nav-group-title">Favorites</h5>
+  <a  href="produto.html" class="nav-group-item active">
+   
+     <a href="vendas.html" class="icon icon-home">
+    Vendas
+  </a>
+  <span class="nav-group-item">
+	  <a href="cadastro_cliente.html" class="icon icon-signal">Vendas</a>
+  <span class="nav-group-item">
+    <span class="icon icon-print"></span>
+    Clientes
+  </span>
+</nav>
+		 </div>
+		<div class="pane">
+        
+         
+            <button type="button" @click="createClient()" class="btn btn-primary">Cadastro de Cliente</button>
+            <a href="produto.html" class="btn btn-primary">Produto</a>
+             <a href="vendas.html" class="btn btn-primary">Vendas</a>
+             <!--Cadastro de Cliente-->
+        <table class="table table-striped">
+        	<thead>
+        		<tr>
+        			<th>Nome</th>
+        			<th>CPF</th>
+        			<th>Telefone</th>
+        		</tr>
+        	</thead>
+        	<!--Lista de clientes-->
+        	<tbody>
+        		<tr v-for="table in clientes">
+        			<td>{{cliente.nome}}</td>
+        			<td>{{cliente.cpf}}</td>
+        			<td>{{cliente.telefone}}</td>
+        			<td> <button type="button" @click="editClient(cliente)" class="btn btn-primary">Editar</button></td>
+        		</tr>
+        	</tbody>
+        </table>
+         </div>
+     </div>
+   </div>
+   
+   <!--Rodape-->
+   <footer class="toolbar toolbar-footer">
+    <h4 class="title">Desenvolvido por Jadson Santos</h4>
+   </footer>
+	</div>
+       <div id="modal" v-if="openModal">
+      	 <div class=".wrap">
+      	 	 <!--Formulario de cadastro  -->
+			   <form id="cadastro-cliente" action="" class="pane-body">
+				  <h3>Cadastro</h3>
+				  <h3 v-if="mode=='edicao'">Editar Clientes</h3>
+				   <div class="form-group">
+					   <input type="text" class="form-control" id="name" v-model="cliet.nome"placeholder="Name">
+					 </div>
+					   <div class="form-group">
+						  <input type="text" class="form-control" id="cpf" v-model="cliet.cpf" placeholder="CPF">
+						</div>
+					   <div class="form-group">
+      	   	  	     <input type="text" class="form-control" id="telefone" v-model="cliet.telefone" placeholder="Telefone"></div>
+      	   	  	     <button type="button"  class="btn btn-positive" @click="clientStoreOrUpdate">Salvar</button>
+      	   	  	     <button type="button" class="btn btn-negative" @click="openModal=false">Fechar</button>
+		    </form>
+      	 </div>
+       </div>
+    
+  </body>
+  <script>
+   require('./renderer.js')
+   var read = require(('read-file-utf8')
+   var loki = require('lokijs');
+   var db = new loki('db.json')
+   var fileExists = require('file-exists');
+   var data={};
+	  if('file-exists' (__dirname+'/db.json')){
+		 data = read(__dirname+'/db.json');  
+		   db.loadJSON(data);
+	  }else{
+		  db.addColletion('vendas');
+	      db.addColletion('clientes');
+	      db.addColletion('produtos');
+		  db.save();
+	  }
+   
+   window.Vue = require('vue');
+   var clientes = db.getColletion('clientes');
+   console.log(db);
+   new Vue({
+	   el: 'body',
+	   data:{
+		   clientes: [],
+		   mode:'',
+		   client:{
+				   nome:'',
+				   cpf:'',
+				   telefone:''
+	   },
+	   openModal:false
+   },
+	   ready: function(){
+	     this.clientes = clientes.data;
+	      console.log(this.clientes);
+	   },
+	   methods:{
+		   editClient: function(client){
+			   this.mode="edicao";
+			   this.openModal=true;
+			   this.client=client;
+		   },
+		   creatClient:function(){
+			       this.mode="cadastro";
+			       this.openModal=true;
+			       this.client={
+				   nome:'',
+				   cpf:'',
+				   telefone:''
+			   };
+		     },
+		     clientStoreOrUpdate: function(){
+				 if(typeof this.client.$loki != 'undefined');{
+					 clientes.updade(this.client);
+				 }else{
+					 clientes.insert(this.client);
+				 }
+				 
+			     db.save();
+				 this.openModal=false;
+		   }
+	   }
+	   
+   })
+   //var clientes = db.addCollection('clientes');
+  </script>
+</html>
